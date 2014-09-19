@@ -1,0 +1,50 @@
+#!/usr/bin/env perl
+use warnings;
+use strict;
+use CGI;
+use JSON;
+use Gravatar::URL;
+use LWP::UserAgent;
+
+my $peers = {
+    asdf => { hook   => 'https://asdf.slack.com/services/hooks/incoming-webhook?token=XXXXX',
+              domain => 'keyboard.io'
+            },
+
+    #  stripe => '...'
+            };
+
+my $q  = CGI->new();
+my $ua = LWP::UserAgent->new();
+
+print "Content-type: text/plain\n\n";
+
+if (($q->param('user_id') || '') =~ /slackbot/i) {
+    print "Proxying bots leads to infinite loops.\n";
+    exit;
+}
+if (($q->param('text') || '') eq '') {
+    print "Blank is boring. Not proxying an empty message\n";
+
+    #    exit;
+}
+
+my $payload = encode_json(
+                        { channel  => '#slappyhour',
+                          username => $q->param('user_name') . "@" . $q->param('team_domain'),
+                          icon_url => gravatar_url(
+                               email => $q->param('user_name') . "@" . $peers->{ $q->param('team_domain') }->{'domain'},
+                               default => 'monsterid'
+                          ),
+                          text => $q->param('text') });
+
+for my $peer (keys %$peers) {
+    next if ($peer eq $q->param('team_domain'));
+    eval {
+        print "Sending to $peer\n";
+        my $res = $ua->post($peers->{$peer}->{'hook'}, Content => $payload);
+        print $res->status_line . "\n";
+    };
+}
+print "That's all for now, folks!\n";
+
