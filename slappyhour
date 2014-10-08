@@ -29,14 +29,12 @@ if (($q->param('text') || '') eq '') {
     #    exit;
 }
 
-my $payload = encode_json(
-                        { channel  => '#slappyhour',
+my $text = $q->param('text');
+utf8::decode($text);
+my $payload = encode_json( { channel  => '#slappyhour',
                           username => $q->param('user_name') . "@" . $q->param('team_domain'),
-                          icon_url => gravatar_url(
-                               email => $q->param('user_name') . "@" . $peers->{ $q->param('team_domain') }->{'domain'},
-                               default => 'monsterid'
-                          ),
-                          text => $q->param('text') });
+                          icon_url => gravatar_url( email => $q->param('user_name') . "@" . $peers->{ $q->param('team_domain') }->{'domain'}, default => 'monsterid'),
+                          text => $text });
 
 for my $peer (keys %$peers) {
     next if ($peer eq $q->param('team_domain'));
