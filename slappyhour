@@ -6,26 +6,20 @@ use JSON;
 use Gravatar::URL;
 use LWP::UserAgent;
 
-my $peers = {
-    asdf => { hook   => 'https://asdf.slack.com/services/hooks/incoming-webhook?token=XXXXX',
-              domain => 'keyboard.io'
-            },
-
-    #  stripe => '...'
+my $peers = { asdf => { hook   => 'https://asdf.slack.com/services/hooks/incoming-webhook?token=XXXXX',
+              domain => 'keyboard.io' },
             };
 
 my $q  = CGI->new();
 my $ua = LWP::UserAgent->new();
 
 print "Content-type: text/plain\n\n";
-
 if (($q->param('user_id') || '') =~ /slackbot/i) {
     print "Proxying bots leads to infinite loops.\n";
     exit;
 }
 if (($q->param('text') || '') eq '') {
     print "Blank is boring. Not proxying an empty message\n";
-
     #    exit;
 }
 
