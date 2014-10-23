@@ -22,14 +22,14 @@ Before you begin configuring a Slack Instance to talk to
 
 First up, navigate to the integration management IO
 
-![](images/image00.png)
+![](setup/images/image00.png)
 
-Next, click on "Incoming Webhooks" ![](images/image05.png)
+Next, click on "Incoming Webhooks" ![](setup/images/image05.png)
 
 Next, pick a channel where all the integration's incoming
   messages should go and click "Add Incoming webhook"
 
-![](images/image01.png)
+![](setup/images/image01.png)
 
 Once you click "add the incoming webhook", you'll see a screen
   that shows you the token for this webhook.
@@ -39,22 +39,22 @@ Make a note of this token. You will need to send the token,
   your organization's internet domain to the person running your
   #slappyhour bridge.
 
-![](images/image02.png)
+![](setup/images/image02.png)
 
 Next, click "Add a new integration"
 
-![](images/image07.png)
+![](setup/images/image07.png)
 
 This time, you want to set up an outgoing webhook to send
   messages from your channel to the #slappyhour bridge.
 
 Click on Outgoing Webhooks.
 
-![](images/image06.png)
+![](setup/images/image06.png)
 
 Click on "Add Outgoing Webhook"
 
-![](images/image04.png)
+![](setup/images/image04.png)
 
 For Channel, pick the channel you selected for your outgoing
   webhook.
@@ -67,7 +67,7 @@ For Label, fill in something that will remind you this is a
 
 Click Save Integration
 
-![](images/image03.png)
+![](setup/images/image03.png)
 
 The last configuration step is to notify the person running
   your #slappyhour bridge.
@@ -76,8 +76,6 @@ You need to tell them:
 
 Your Incoming Webhook Token
 
-Your Slack Instance's URL (Something like
-  https://asdf.slack.com)
+Your Slack Instance's URL (Something like https://asdf.slack.com)
 
-Your organization's internet domain. (Something like
-  example.com)
+Your organization's internet domain. (Something like example.com)
