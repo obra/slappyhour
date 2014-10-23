@@ -20,7 +20,7 @@ if (($q->param('user_id') || '') =~ /slackbot/i) {
 }
 if (($q->param('text') || '') eq '') {
     print "Blank is boring. Not proxying an empty message\n";
-    #    exit;
+    exit;
 }
 
 my $text = $q->param('text');
@@ -39,4 +39,3 @@ for my $peer (keys %$peers) {
     };
 }
 print "That's all for now, folks!\n";
-
