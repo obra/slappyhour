@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Mac OS X (vers 31 October 2006 - Apple Inc. build 15.15), see www.w3.org">
+
+  <title>Setting up a #slappyhour integration</title>
+  <meta content="text/html; charset=us-ascii" http-equiv=
+  "content-type">
+</head>
+
+<body>
+  <p>To set up a basic cross-slack integration with #slappyhour,
+  you need the following</p>
+
+  <ul>
+    <li>A copy of <a href=
+    "https://github.com/obra/slappyhour">https://github.com/obra/slappyhour</a>
+    running somewhere. It's a CGI script written in vintage
+    1990s-era Perl. It's also all of 40 lines long</li>
+
+    <li>The ability to set up channels and configure integrations
+    on all the Slack instances you want to bridge</li>
+  </ul>
+
+  <p>On each slack instance, you need to add two integrations: an
+  incoming webhook and an outgoing webhook.</p>
+
+  <p>Before you begin configuring a Slack Instance to talk to
+  #slappyhour, you will need:</p>
+
+  <ul>
+    <li>The URL of your #slappyhour bridge. Ask the person hosting
+    the CGI script.</li>
+  </ul>
+
+  <h2>Adding the incoming webhook</h2>
+
+  <p>First up, navigate to the integration management IO</p>
+
+  <p><img src="images/image00.png" style=
+  "width: 624.00px; height: 426.67px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>Next, click on "Incoming Webhooks" <img src=
+  "images/image05.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;">
+  </p>
+
+  <p>Next, pick a channel where all the integration's incoming
+  messages should go and click "Add Incoming webhook"</p>
+
+  <p><img src="images/image01.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>Once you click "add the incoming webhook", you'll see a screen
+  that shows you the token for this webhook.</p>
+
+  <p>Make a note of this token. You will need to send the token,
+  along with the name of your slack instance (xxx.slack.com) and
+  your organization's internet domain to the person running your
+  #slappyhour bridge.</p>
+
+  <p><img src="images/image02.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>Next, click "Add a new integration"</p>
+
+  <p><img src="images/image07.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>This time, you want to set up an outgoing webhook to send
+  messages from your channel to the #slappyhour bridge.</p>
+
+  <p>Click on Outgoing Webhooks.</p>
+
+  <p><img src="images/image06.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>Click on "Add Outgoing Webhook"</p>
+
+  <p><img src="images/image04.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>For Channel, pick the channel you selected for your outgoing
+  webhook.</p>
+
+  <p>For URLs, fill in the URL of the CGI script provided to you by
+  the person running your #slappyhour bridge.</p>
+
+  <p>For Label, fill in something that will remind you this is a
+  #slappyhour integration.</p>
+
+  <p>Click Save Integration</p>
+
+  <p><img src="images/image03.png" style=
+  "width: 624.00px; height: 380.00px; margin-left: 0.00px; margin-top: 0.00px;"></p>
+
+  <p>The last configuration step is to notify the person running
+  your #slappyhour bridge.</p>
+
+  <p>You need to tell them:</p>
+
+  <p>Your Incoming Webhook Token</p>
+
+  <p>Your Slack Instance's URL (Something like
+  https://asdf.slack.com)</p>
+
+  <p>Your organization's internet domain. (Something like
+  example.com)</p>
+</body>
+</html>
