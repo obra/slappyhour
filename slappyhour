@@ -3,9 +3,11 @@
 # Forked to handle multi-channel sync / token auth
 # (but doesn't support 1-n peers like original slappyhour)
 # https://github.com/paulgregg/slappyhour-multi
+# Copyright 2015 Paul Gregg https://pgregg.com (for my code only)
 
 # With thanks to original slappyhour devs
 # https://github.com/obra/slappyhour
+# Copyright 2014 Keyboardio, Inc. http://keyboard.io
 
 use warnings;
 use strict;
