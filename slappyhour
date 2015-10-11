@@ -1,14 +1,72 @@
 #!/usr/bin/env perl
+
+# Forked to handle multi-channel sync / token auth
+# (but doesn't support 1-n peers like original slappyhour)
+# https://github.com/paulgregg/slappyhour-multi
+# Copyright 2015 Paul Gregg https://pgregg.com (for my code only)
+
+# With thanks to original slappyhour devs
+# https://github.com/obra/slappyhour
+# Copyright 2014 Keyboardio, Inc. http://keyboard.io
+
 use warnings;
 use strict;
 use CGI;
 use JSON;
 use Gravatar::URL;
 use LWP::UserAgent;
+use Data::Dumper;
 
-my $peers = { asdf => { hook   => 'https://asdf.slack.com/services/hooks/incoming-webhook?token=XXXXX',
-              domain => 'keyboard.io' },
-            };
+my $debuglevel = 0; # 0=off, 1=errors, 2=info (errors and chat messages), 3=debug
+my $debuglog = '/tmp/slappyhour.log';
+
+# Define each team as a peer.
+# Each peer should have hash sections for:
+# - tokens   : one token per channel in this peer - to validate message came from this team/channel
+# - hooks    : one hook per channel in this peer - for us to send message to that team/channel
+# - channels : one entry per channel to define the target peer and target channel in the remote peer
+
+# In the sample below we are configuring bi-directional communication between 2 teams and 2 channels
+#    Team1             Team2
+#    #t2_general  <->  #general
+#    #passcodes   <->  #passcodes
+# The structure allows 1-1, 1-n or n-n teams and channels to be synced.
+# Note that in slappyhour-multi - target peers/channels must be explicitly defined or your
+# message will not be sent to another team channel
+
+my $peers = {
+    team1 => {
+        tokens  => { # Specify the channel tokens for this peer
+            t2_general  => 'team1chan1token',
+            passcodes   => 'team1chan2token',
+        },
+        hooks   => { # For sending messages to this slack team / channel from this proxy
+            t2_general  => 'https://hooks.slack.com/services/xxxxxxxxx/yyyyyyyyy/abcdefghijklmnopqrstuvwx',
+            passcodes   => 'https://hooks.slack.com/services/xxxxxxxxx/zzzzzzzzz/abcdefghijklmnopqrstuvwx',
+        },
+        channels => { # Specify the channel from this peer and to where it needs to sync to
+            t2_general  => { targets => [ { peer => 'team2', channel => 'general' }, ] },
+            passcodes   => { targets => [ { peer => 'team2', channel => 'passcodes' }, ] },
+        },
+        domain => 'pgregg.com'
+    },
+
+    team2 => {
+        tokens  => {
+            general   => 'team2chan1token',
+            passcodes => 'team2chan2token',
+        },
+        hooks  => {
+            general   => 'https://hooks.slack.com/services/aaaaaaaaa/bbbbbbbbb/abcdefghijklmnopqrstuvwx',
+            passcodes => 'https://hooks.slack.com/services/aaaaaaaaa/ccccccccc/abcdefghijklmnopqrstuvwx',
+        },
+        channels => {
+            general   => { targets => [ { peer => 'team1', channel => 'new_general' }, ] },
+            passcodes => { targets => [ { peer => 'team1', channel => 'passcodes' }, ] },
+        },
+        domain => 'pgregg.com'
+    },
+};
 
 my $q  = CGI->new();
 my $ua = LWP::UserAgent->new();
@@ -23,19 +81,46 @@ if (($q->param('text') || '') eq '') {
     exit;
 }
 
+open(DEBUG, ">>$debuglog") if ($debuglevel>0);
+print DEBUG Dumper($q) if ($debuglevel>2);
+
+#Validate the team / channel token
+if (($q->param('token') || '') ne ($peers->{$q->param('team_domain')}->{'tokens'}->{$q->param('channel_name')} || 'X')) {
+    print "Invalid token. Not accepting message.\n";
+    print DEBUG "Invalid token "
+        . $q->param('token') . " != " . $peers->{$q->param('team_domain')}->{'token'}
+        . " for channel " . $q->param('channel_name') . "\n" if ($debuglevel);
+    exit;
+}
+
+
 my $text = $q->param('text');
 utf8::decode($text);
-my $payload = encode_json( { channel  => '#slappyhour',
-                          username => $q->param('user_name') . "@" . $q->param('team_domain'),
-                          icon_url => gravatar_url( email => $q->param('user_name') . "@" . $peers->{ $q->param('team_domain') }->{'domain'}, default => 'monsterid'),
-                          text => $text });
 
-for my $peer (keys %$peers) {
-    next if ($peer eq $q->param('team_domain'));
+print DEBUG "> " . $q->param('user_name') . "@" . $q->param('team_domain') . ': ' . $text . "\n" if ($debuglevel>1);
+
+# Iterate the channels target this team/channel is (explicitly) synced to
+for my $target (@{$peers->{$q->param('team_domain')}->{'channels'}->{$q->param('channel_name')}->{targets}}) {
+    my $peer = $target->{peer};
+    my $target_channel = $target->{channel};
+    print DEBUG "Target peer: $peer and channel $target_channel\n" if ($debuglevel>2);
+
     eval {
         print "Sending to $peer\n";
-        my $res = $ua->post($peers->{$peer}->{'hook'}, Content => $payload);
+
+        my $payload = encode_json( {
+            channel  => "#$target_channel",
+            username => $q->param('user_name') . "@" . $q->param('team_domain'),
+            icon_url => gravatar_url( email => $q->param('user_name') . "@" . $peers->{ $q->param('team_domain') }->{'domain'}, default => 'monsterid'),
+            text => $text } );
+
+        print DEBUG $payload . "\n" if ($debuglevel>2);
+        my $res = $ua->post($peers->{$peer}->{'hooks'}->{$target_channel}, Content => $payload);
         print $res->status_line . "\n";
+        print DEBUG $res->status_line . "\n" if ($debuglevel>2);
     };
 }
+
+close(DEBUG) if ($debuglevel);
+
 print "That's all for now, folks!\n";
